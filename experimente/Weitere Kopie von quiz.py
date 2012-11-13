@@ -15,7 +15,6 @@ last edited: October 2011
 
 import sys
 from PyQt4 import QtGui
-import random
 
 Anzahl_Antworten= 4
 
@@ -68,15 +67,14 @@ class Window(QtGui.QWidget):
 	  #Button.clicked.connect(lambda: self.check())
 	  #print i
 	  #x= int(i)
-	  self.btnlist.append(QtGui.QPushButton(str(i)))
+	  self.btnlist.append(QtGui.QPushButton("bla"))
 	  
 	  #self.btnlist[i].clicked.connect(lambda: self.right(i))#  klappt nicht, alle geben das gleiche aus daher anders
-	 # self.btnlist[i].clicked.connect(lambda value=i : self.check(value))
+	  self.btnlist[i].clicked.connect(lambda value=i : self.check(value))
 	  self.btnlist[i].setSizePolicy(QtGui.QSizePolicy( QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding))
 	  grid.addWidget(self.btnlist[i],2,i)
 	  
         self.setLayout(grid)    
-        self.refresh(True)
         
         self.resize(640,480)
         self.setWindowTitle('Buttons')    
@@ -86,28 +84,11 @@ class Window(QtGui.QWidget):
       print i
       
 	
-    def right(self):
-      print("right")
-      self.refresh()
-      
-      
+    def right(self,n):
+      print(n)
     def wrong(self):
       print("wrong")
-      
-      
-    def refresh(self,first=False):
-      r=random.randint(0,Anzahl_Antworten)
-      print("refresh"+ str(r))
-      for i in range(0,Anzahl_Antworten):
-	if i == r:
-	  if first != True:
-	    self.btnlist[i].clicked.disconnect()
-	  self.btnlist[i].clicked.connect(lambda: self.right())
-	else:
-	  if first != True:
-	    self.btnlist[i].clicked.disconnect()
-	  self.btnlist[i].clicked.connect(lambda: self.wrong())
-
+        
 def main():
     
     app = QtGui.QApplication(sys.argv)
