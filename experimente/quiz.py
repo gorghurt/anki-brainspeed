@@ -7,10 +7,19 @@
 import sys
 from PyQt4 import QtGui
 import random
+import time
+import threading
+import thread
+#import sys #für lambda prints
+from numpy import * #für arange
+
 
 Anzahl_Antworten= 2
 questions=["a?","b?","c?","d?","e?","f","g","h","i","j"]
 answers=["a?","b?","c?","d?","e?","f","g","h","i","j"]
+zeit=3
+rightfaktor=0.9
+wrongfaktor=1.1
 
 class Window(QtGui.QWidget):    
     def __init__(self):
@@ -53,24 +62,33 @@ class Window(QtGui.QWidget):
 	
 	#Fenster erstellen
         self.setLayout(grid)    
-        #erster Refresh  (später entfernen und durch start dialog ersetzen, oder dieses fesnter nach start dialog erstellen)
-        self.refresh(True)
-        
+    
         self.resize(640,480)
         self.setWindowTitle('Anki-BrainSpeed')    
         self.show()
         
-    def check(self,i):
-      print i
-      
+        #Variablen instanzen(timer) etc
+        self.time=zeit
+        self.timer=timer(self.time,lambda: self.refreshtimelabel(),lambda: self.wrong())
+        
+        #erster Refresh  (später entfernen und durch start dialog ersetzen, oder dieses fesnter nach start dialog erstellen)
+ 
+        self.refresh(True)
+        
+        
+    def refreshtimelabel(self):
+	self.timelabel.setText(str(self.timer.counter));
 	
     def right(self):
       print("right")
+      self.time=self.time*rightfaktor
       self.refresh()
       
       
     def wrong(self):
       print("wrong")
+      self.time=self.time*wrongfaktor
+      self.refresh()
       
       
     def refresh(self, first=False):
@@ -95,13 +113,38 @@ class Window(QtGui.QWidget):
 	      else:
 		wrong=wrong-1
 	  self.btnlist[i].setText(answers[wrong])
-
+	if first != True:
+	  self.timelabel.setText(str(self.time))
+	  self.timer.runTime=self.time
+	  thread.start_new_thread (self.timer.run())
+ #timer verhindert gui. qtimer aus qt angucken    
+class timer(threading.Thread):
+#based on some code i found while using google. forgot from where it is. if you are the creator, contact me please.
+#I would be glad to mention you.
+    def __init__(self, seconds, refresh , do):
+      self.runTime = seconds
+      self.counter=self.runTime 
+      self.action=do
+      self.refresh=refresh
+      threading.Thread.__init__(self)
+    def run(self):
+      self.counter=self.runTime 
+      for sec in arange(0,self.runTime,0.1):#range(0,self.runTime*10,0.1):
+	print self.counter
+	time.sleep(0.1)
+	self.counter-=0.1
+	self.refresh()
+      self.action()
+      print "Done."
 def main():
     
     app = QtGui.QApplication(sys.argv)
     w = Window()
+    #timex =timer(100, lambda: sys.stdout.write('foo\n'))
+    #timex.runTime=3
+    #timex.run()
+    #sys.exit(app.exec_())
     sys.exit(app.exec_())
-
 
 if __name__ == '__main__':
     main()
