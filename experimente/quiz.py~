@@ -20,10 +20,10 @@ import thread
 from numpy import * #für arange
 
 
-Anzahl_Antworten= 2
+Anzahl_Antworten= 2 #wie viele buttons sollen angezeigt werden
 questions=["a?","b?","c?","d?","e?","f","g","h","i","j"]
 answers=["a?","b?","c?","d?","e?","f","g","h","i","j"]
-questions=[u"わかた",u"はは"]  #irgendwie utf-8 zum laufen bringen
+questions=[u"わかた",u"はは"] 
 answers=[u"わかた",u"はは"]
 zeit=3000
 rightfaktor=0.9
@@ -33,6 +33,8 @@ wrongfaktor=1.1
 times_to_wrongfaktor=1
 wrong_breaks_combo=False #noch nicht implementiert
 wrong_counts_as_combo=False #noch nicht drin
+
+Lives_at_start=3
 
 time_to_next_round=500
 time_to_next_round_w=time_to_next_round #pausen zeit bei falsch antwort
@@ -46,7 +48,7 @@ class Window(QtGui.QWidget):
         
     def initUI(self):
 	n=Anzahl_Antworten
-	
+	self.lives=Lives_at_start
 	#grid Layout:
         grid=QtGui.QGridLayout()
         
@@ -137,6 +139,8 @@ class Window(QtGui.QWidget):
       # pause machen und dann refreshen
       QtCore.QTimer.singleShot(time_to_next_round_r,lambda: self.refresh())
 	
+    def game_over(self):
+      print("gameover")
       
     def wrong(self):
       #timer stoppen
@@ -148,17 +152,22 @@ class Window(QtGui.QWidget):
       print("wrong")
       self.label.setText("WRONG -1")
       
-      #zeitänderung wegen wrong
-      self.time=self.time*wrongfaktor
-      
-      #pause machen und dann refreshen
-      QtCore.QTimer.singleShot(time_to_next_round_w,lambda: self.refresh())
-      	
+      self.lives=self.lives-1
+      if self.lives < 0:
+	self.game_over()
+      else:
+	#zeitänderung wegen wrong
+	self.time=self.time*wrongfaktor
+	
+	#pause machen und dann refreshen
+	QtCore.QTimer.singleShot(time_to_next_round_w,lambda: self.refresh())
+	  
       
     def refresh(self, first=False):
       #richtige antwort zufällig wählen
       right = random.randint(0, len(answers) )
       #frage setzen
+      self.lebenlabel.setText("lives:" + str(self.lives))
       self.label.setText(questions[right])
       #button für richtige antwort zufälig wählen
       r=random.randint(0, Anzahl_Antworten)# -1 entfernt weil letzter button nie right
